@@ -17,6 +17,8 @@ struct filebrowser_client{
     json new_user_template;
 
     std::string token;
+    std::string username_saved;
+    std::string password_saved;
 
 
     filebrowser_client(const std::string& server, const json &tmpl) :
@@ -25,6 +27,8 @@ struct filebrowser_client{
         {}
 
     void login(const std::string &username, const std::string &password){
+        username_saved = username;
+        password_saved = password;
         json req;
         req["username"] = username;
         req["password"] = password;
@@ -58,7 +62,7 @@ struct filebrowser_client{
         }
 
         json obj = json::parse(res->body);
-        for (const auto user:obj) {
+        for (const auto &user:obj) {
             result.insert(user["username"].get<std::string>());
         }
 
@@ -69,8 +73,6 @@ struct filebrowser_client{
         const std::string &username, const std::string &password
         )
     {
-        bool ok = true;
-
         json data = new_user_template;
         data["data"]["username"] = username;
         data["data"]["password"] = password;
@@ -81,6 +83,15 @@ struct filebrowser_client{
                         data.dump(),
                         "application/json"
         );
+
+        if (res != nullptr && res->status == 403) {
+            login(username_saved, password_saved);
+            res = cli.Post("/api/users",
+                        default_headers,
+                        data.dump(),
+                        "application/json"
+            );
+        }
 
         if (res == nullptr || res->status < 200 || res->status >= 300) {
             return false;
