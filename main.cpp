@@ -59,7 +59,6 @@ handle_events(int fd, int wd, const config& cfg, filebrowser_client* client)
 	char buf[4096]
 		__attribute__ ((aligned(__alignof__(struct inotify_event))));
 	const struct inotify_event *event;
-	int i;
 	ssize_t len;
 	char *ptr;
 
@@ -154,7 +153,6 @@ int main(const int argc, const char **argv)
 {
 	int fd, i, poll_num;
 	int wd;
-	char buf;
 	
 	pollfd fds;
 	nfds_t nfds;
